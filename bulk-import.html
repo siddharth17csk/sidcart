@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Import - SidCart Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --green:#0c831f; --text:#1a1a2e; --gray:#666; --border:#e8e8e8; --bg:#f5f7fa; --red:#e53935; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); padding:30px 20px; }
+        .container { max-width:900px; margin:0 auto; }
+        h1 { font-family:'Poppins',sans-serif; font-size:28px; font-weight:900; color:var(--text); margin-bottom:6px; }
+        .subtitle { color:var(--gray); font-size:14px; margin-bottom:30px; }
+
+        /* Steps */
+        .steps { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:30px; }
+        .step-card { background:white; border-radius:14px; padding:20px; border:2px solid var(--border); }
+        .step-card .num { font-family:'Poppins',sans-serif; font-size:28px; font-weight:900; color:var(--green); }
+        .step-card h3 { font-size:14px; font-weight:700; margin:6px 0 4px; }
+        .step-card p { font-size:12px; color:var(--gray); line-height:1.5; }
+
+        /* CSV format box */
+        .format-box { background:white; border-radius:14px; padding:24px; margin-bottom:24px; border:1px solid var(--border); }
+        .format-box h2 { font-family:'Poppins',sans-serif; font-size:16px; margin-bottom:14px; }
+        .csv-example { background:#f8f9fa; border-radius:8px; padding:14px; font-family:monospace; font-size:12px; color:var(--text); overflow-x:auto; line-height:1.8; border:1px solid var(--border); }
+        .download-btn { display:inline-flex; align-items:center; gap:6px; margin-top:12px; padding:9px 18px; background:var(--green); color:white; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; }
+        .download-btn:hover { background:#086318; }
+
+        /* Upload area */
+        .upload-card { background:white; border-radius:14px; padding:24px; margin-bottom:24px; border:1px solid var(--border); }
+        .upload-card h2 { font-family:'Poppins',sans-serif; font-size:16px; margin-bottom:16px; }
+        .drop-zone {
+            border:2px dashed var(--border); border-radius:12px; padding:40px 20px;
+            text-align:center; cursor:pointer; transition:all 0.2s; margin-bottom:16px;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { border-color:var(--green); background:rgba(12,131,31,0.04); }
+        .drop-zone .icon { font-size:48px; display:block; margin-bottom:10px; }
+        .drop-zone p { color:var(--gray); font-size:14px; }
+        .drop-zone strong { color:var(--green); }
+        #csv-file-input { display:none; }
+
+        /* Preview table */
+        .preview-section { margin-bottom:24px; display:none; }
+        .preview-section h2 { font-family:'Poppins',sans-serif; font-size:16px; margin-bottom:12px; }
+        .table-wrap { overflow-x:auto; border-radius:10px; border:1px solid var(--border); }
+        table { width:100%; border-collapse:collapse; font-size:13px; }
+        th { background:#f8f9fa; padding:10px 12px; text-align:left; font-weight:700; font-size:12px; color:var(--gray); text-transform:uppercase; letter-spacing:0.4px; border-bottom:1px solid var(--border); }
+        td { padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); }
+        tr:last-child td { border-bottom:none; }
+        tr:hover td { background:#fafafa; }
+        .badge-valid   { background:#dcfce7; color:#166534; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+        .badge-error   { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+
+        /* Import button */
+        .import-section { background:white; border-radius:14px; padding:24px; border:1px solid var(--border); display:none; }
+        .import-section h2 { font-family:'Poppins',sans-serif; font-size:16px; margin-bottom:6px; }
+        .import-section p { font-size:13px; color:var(--gray); margin-bottom:16px; }
+        .import-btn { padding:14px 32px; background:var(--green); color:white; border:none; border-radius:10px; font-size:16px; font-weight:700; font-family:'Poppins',sans-serif; cursor:pointer; transition:all 0.2s; }
+        .import-btn:hover { background:#086318; transform:translateY(-1px); }
+        .import-btn:disabled { background:#ccc; cursor:not-allowed; transform:none; }
+
+        /* Progress */
+        .progress-wrap { margin-top:16px; display:none; }
+        .progress-bar-bg { background:#e8e8e8; border-radius:10px; height:10px; margin-bottom:8px; }
+        .progress-bar-fill { background:var(--green); height:10px; border-radius:10px; width:0%; transition:width 0.3s; }
+        .progress-text { font-size:13px; color:var(--gray); }
+
+        /* Log */
+        .log-box { background:#1a1a2e; color:#a8ff78; border-radius:10px; padding:16px; font-family:monospace; font-size:12px; max-height:200px; overflow-y:auto; margin-top:14px; display:none; line-height:1.8; }
+        .log-box .err { color:#ff6b6b; }
+        .log-box .ok  { color:#a8ff78; }
+        .log-box .inf { color:#74b9ff; }
+
+        /* Stats row */
+        .stats-row { display:flex; gap:16px; margin-top:16px; flex-wrap:wrap; }
+        .stat-box { flex:1; min-width:120px; background:#f8f9fa; border-radius:10px; padding:14px; text-align:center; border:1px solid var(--border); }
+        .stat-box .num { font-family:'Poppins',sans-serif; font-size:28px; font-weight:900; }
+        .stat-box p { font-size:12px; color:var(--gray); margin-top:2px; }
+        .stat-box.green .num { color:var(--green); }
+        .stat-box.red   .num { color:var(--red); }
+        .stat-box.blue  .num { color:#3b82f6; }
+
+        @media(max-width:600px) { .steps { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📦 Bulk Product Import</h1>
+    <p class="subtitle">Upload a CSV file to add hundreds of products to Firestore at once</p>
+
+    <!-- STEPS -->
+    <div class="steps">
+        <div class="step-card">
+            <div class="num">1</div>
+            <h3>Download Template</h3>
+            <p>Get the CSV template with the correct column headers already set up</p>
+        </div>
+        <div class="step-card">
+            <div class="num">2</div>
+            <h3>Fill Your Products</h3>
+            <p>Add your products in Excel or Google Sheets, then export as CSV</p>
+        </div>
+        <div class="step-card">
+            <div class="num">3</div>
+            <h3>Upload & Import</h3>
+            <p>Upload the CSV here and all products go to Firestore instantly</p>
+        </div>
+    </div>
+
+    <!-- CSV FORMAT -->
+    <div class="format-box">
+        <h2>📋 CSV Column Format</h2>
+        <div class="csv-example">title,brand,category,gender,price,qty,image,description,active
+Puma Running Shoes,Puma,Footwear,Men,3499,100,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400,Lightweight running shoes,true
+Nike Air Max,Nike,Footwear,Women,5999,50,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400,Comfortable air cushion,true
+Levi's 511 Jeans,Levi's,Clothing,Men,2999,75,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400,Slim fit denim jeans,true</div>
+        <button class="download-btn" onclick="downloadTemplate()">⬇️ Download CSV Template</button>
+        <div style="margin-top:12px; font-size:12px; color:var(--gray);">
+            <strong>gender</strong> options: Men · Women · Kids · Unisex &nbsp;|&nbsp;
+            <strong>active</strong>: true (visible in shop) or false (hidden) &nbsp;|&nbsp;
+            <strong>image</strong>: any public image URL
+        </div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="upload-card">
+        <h2>📁 Upload Your CSV</h2>
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('csv-file-input').click()">
+            <span class="icon">📄</span>
+            <p><strong>Click to choose</strong> or drag & drop your CSV file here</p>
+            <p style="font-size:12px;margin-top:6px;">Supports .csv files only</p>
+        </div>
+        <input type="file" id="csv-file-input" accept=".csv">
+        <div id="file-name-display" style="font-size:13px;color:var(--gray);"></div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-section" id="preview-section">
+        <h2>👀 Preview (<span id="preview-count">0</span> rows)</h2>
+        <div class="table-wrap">
+            <table id="preview-table">
+                <thead><tr id="preview-head"></tr></thead>
+                <tbody id="preview-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row" id="stats-row" style="display:none;">
+        <div class="stat-box blue"><div class="num" id="stat-total">0</div><p>Total rows</p></div>
+        <div class="stat-box green"><div class="num" id="stat-valid">0</div><p>Valid</p></div>
+        <div class="stat-box red"><div class="num" id="stat-errors">0</div><p>Errors</p></div>
+    </div>
+
+    <!-- IMPORT -->
+    <div class="import-section" id="import-section">
+        <h2>🚀 Ready to Import</h2>
+        <p id="import-desc">Click below to upload all valid products to Firestore.</p>
+        <button class="import-btn" id="import-btn" onclick="startImport()">Import to Firestore</button>
+
+        <div class="progress-wrap" id="progress-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+            <div class="progress-text" id="progress-text">0 / 0 uploaded</div>
+        </div>
+
+        <div class="log-box" id="log-box"></div>
+    </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBIKDCZ1sHZb1H94slOhTTxK79h9TSvlCg",
+    authDomain: "sidcart-e1082.firebaseapp.com",
+    projectId: "sidcart-e1082",
+    storageBucket: "sidcart-e1082.firebasestorage.app",
+    messagingSenderId: "523171688101",
+    appId: "1:523171688101:web:1b93197136b381329aa74c"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let parsedRows = [];
+let validRows  = [];
+
+// ── CSV Template download ────────────────────────────────────────────────────
+window.downloadTemplate = function() {
+    const header = "title,brand,category,gender,price,qty,image,description,active\n";
+    const sample = [
+        "Puma Running Shoes,Puma,Footwear,Men,3499,100,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400,Lightweight running shoes,true",
+        "Nike Air Max,Nike,Footwear,Women,5999,50,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400,Comfortable air cushion shoes,true",
+        "Levi's 511 Jeans,Levi's,Clothing,Men,2999,75,,Slim fit denim jeans,true",
+        "H&M Floral Dress,H&M,Clothing,Women,1499,60,,Lightweight floral summer dress,true",
+        "Apple AirPods,Apple,Electronics,Unisex,14999,30,,Wireless earbuds with active noise cancellation,true"
+    ].join("\n");
+    const blob = new Blob([header + sample], {type:"text/csv"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "sidcart_products_template.csv";
+    a.click();
+};
+
+// ── CSV Parser ───────────────────────────────────────────────────────────────
+function parseCSV(text) {
+    const lines = text.trim().split("\n").map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+    return lines.slice(1).map((line, idx) => {
+        // Handle commas inside quotes
+        const cols = [];
+        let cur = "", inQ = false;
+        for (const ch of line) {
+            if (ch==='"') inQ=!inQ;
+            else if (ch==="," && !inQ) { cols.push(cur.trim()); cur=""; }
+            else cur += ch;
+        }
+        cols.push(cur.trim());
+        const row = { _rowNum: idx + 2, _errors: [] };
+        headers.forEach((h, i) => row[h] = cols[i] || "");
+        // Validate
+        if (!row.title)              row._errors.push("Missing title");
+        if (!row.price || isNaN(Number(row.price))) row._errors.push("Invalid price");
+        if (!row.qty   || isNaN(Number(row.qty)))   row._errors.push("Invalid qty");
+        if (!row.category)           row._errors.push("Missing category");
+        return row;
+    });
+}
+
+// ── File input ───────────────────────────────────────────────────────────────
+document.getElementById("csv-file-input").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    document.getElementById("file-name-display").textContent = "📄 " + file.name + " (" + (file.size/1024).toFixed(1) + " KB)";
+    const reader = new FileReader();
+    reader.onload = ev => processCSV(ev.target.result);
+    reader.readAsText(file);
+});
+
+// Drag & drop
+const dz = document.getElementById("drop-zone");
+dz.addEventListener("dragover", e => { e.preventDefault(); dz.classList.add("drag-over"); });
+dz.addEventListener("dragleave", ()=> dz.classList.remove("drag-over"));
+dz.addEventListener("drop", e => {
+    e.preventDefault(); dz.classList.remove("drag-over");
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith(".csv")) {
+        document.getElementById("file-name-display").textContent = "📄 " + file.name;
+        const reader = new FileReader();
+        reader.onload = ev => processCSV(ev.target.result);
+        reader.readAsText(file);
+    }
+});
+
+function processCSV(text) {
+    parsedRows = parseCSV(text);
+    validRows  = parsedRows.filter(r => r._errors.length === 0);
+    const errorRows = parsedRows.filter(r => r._errors.length > 0);
+
+    // Show preview (first 20 rows)
+    const previewSection = document.getElementById("preview-section");
+    previewSection.style.display = "block";
+    document.getElementById("preview-count").textContent = parsedRows.length;
+
+    // Stats
+    document.getElementById("stats-row").style.display = "flex";
+    document.getElementById("stat-total").textContent  = parsedRows.length;
+    document.getElementById("stat-valid").textContent  = validRows.length;
+    document.getElementById("stat-errors").textContent = errorRows.length;
+
+    // Table
+    const cols = ["_rowNum","title","brand","category","gender","price","qty","active","_errors"];
+    const labels = ["Row","Title","Brand","Category","Gender","Price","Qty","Active","Status"];
+    document.getElementById("preview-head").innerHTML = labels.map(l=>`<th>${l}</th>`).join("");
+    document.getElementById("preview-body").innerHTML = parsedRows.slice(0,50).map(row => {
+        const isValid = row._errors.length === 0;
+        return `<tr>
+            <td>${row._rowNum}</td>
+            <td>${row.title||"—"}</td>
+            <td>${row.brand||"—"}</td>
+            <td>${row.category||"—"}</td>
+            <td>${row.gender||"—"}</td>
+            <td>₹${row.price||"—"}</td>
+            <td>${row.qty||"—"}</td>
+            <td>${row.active||"true"}</td>
+            <td>${isValid ? `<span class="badge-valid">✓ Valid</span>` : `<span class="badge-error">✕ ${row._errors.join(", ")}</span>`}</td>
+        </tr>`;
+    }).join("");
+
+    // Import section
+    if (validRows.length > 0) {
+        document.getElementById("import-section").style.display = "block";
+        document.getElementById("import-desc").textContent = `${validRows.length} valid products ready to import. ${errorRows.length > 0 ? errorRows.length + " rows with errors will be skipped." : ""}`;
+    }
+}
+
+// ── Import ───────────────────────────────────────────────────────────────────
+window.startImport = async function() {
+    if (!validRows.length) return;
+    const btn  = document.getElementById("import-btn");
+    const prog = document.getElementById("progress-wrap");
+    const fill = document.getElementById("progress-fill");
+    const txt  = document.getElementById("progress-text");
+    const log  = document.getElementById("log-box");
+
+    btn.disabled = true; btn.textContent = "Importing...";
+    prog.style.display = "block";
+    log.style.display  = "block";
+    log.innerHTML      = `<span class="inf">Starting import of ${validRows.length} products...</span>\n`;
+
+    let done = 0, errors = 0;
+
+    for (const row of validRows) {
+        try {
+            await addDoc(collection(db, "products"), {
+                title:       row.title,
+                brand:       row.brand       || "",
+                category:    row.category,
+                gender:      row.gender      || "Unisex",
+                price:       Number(row.price),
+                qty:         Number(row.qty),
+                image:       row.image       || "",
+                description: row.description || "",
+                active:      row.active !== "false",
+                createdAt:   new Date()
+            });
+            done++;
+            const pct = Math.round((done / validRows.length) * 100);
+            fill.style.width = pct + "%";
+            txt.textContent  = done + " / " + validRows.length + " uploaded";
+            log.innerHTML   += `<span class="ok">✓ Row ${row._rowNum}: ${row.title}</span>\n`;
+            log.scrollTop    = log.scrollHeight;
+            // Small delay to avoid Firestore rate limits
+            if (done % 20 === 0) await new Promise(r => setTimeout(r, 500));
+        } catch(e) {
+            errors++;
+            log.innerHTML += `<span class="err">✕ Row ${row._rowNum}: ${e.message}</span>\n`;
+        }
+    }
+
+    log.innerHTML += `\n<span class="inf">✅ Done! ${done} products imported. ${errors} failed.</span>`;
+    btn.textContent = "✅ Import Complete!";
+    btn.style.background = "#086318";
+};
+</script>
+</body>
+</html>

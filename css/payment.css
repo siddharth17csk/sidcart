@@ -1,0 +1,69 @@
+        :root { --green:#0c831f; --green-light:#e8f5e9; --text:#1a1a2e; --gray:#666; --border:#e8e8e8; --bg:#f5f7fa; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+
+        .payment-card {
+            background:white; border-radius:24px; padding:36px 32px;
+            width:100%; max-width:460px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .pay-header { text-align:center; margin-bottom:28px; }
+        .pay-logo { font-family:'Poppins',sans-serif; font-size:26px; font-weight:900; color:var(--green); }
+        .pay-logo span { color:var(--text); }
+        .upi-badge {
+            display:inline-flex; align-items:center; gap:6px;
+            background:#f0f0fa; border-radius:20px; padding:6px 14px;
+            font-size:13px; font-weight:700; color:#3b3b9e; margin-top:10px;
+        }
+
+        /* Order summary box */
+        .order-box {
+            background:var(--bg); border-radius:14px; padding:16px 18px;
+            margin-bottom:24px; border:1px solid var(--border);
+        }
+        .order-box h3 { font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; margin-bottom:12px; color:var(--gray); text-transform:uppercase; letter-spacing:0.5px; }
+        .order-item-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; }
+        .order-item-row .name { color:var(--text); font-weight:600; }
+        .order-item-row .amount { color:var(--text); }
+        .order-divider { border:none; border-top:1px solid var(--border); margin:10px 0; }
+        .order-total-row { display:flex; justify-content:space-between; font-size:16px; font-weight:700; font-family:'Poppins',sans-serif; }
+
+        /* Form */
+        .form-section h2 { font-family:'Poppins',sans-serif; font-size:18px; margin-bottom:6px; }
+        .form-section p { font-size:13px; color:var(--gray); margin-bottom:20px; }
+        label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; }
+        input {
+            width:100%; padding:14px 16px; border:2px solid var(--border);
+            border-radius:12px; font-size:15px; font-family:'DM Sans',sans-serif;
+            outline:none; transition:border 0.2s; margin-bottom:16px;
+        }
+        input:focus { border-color:var(--green); }
+        .hint { font-size:12px; color:var(--gray); margin-top:-12px; margin-bottom:16px; }
+
+        .pay-btn {
+            width:100%; padding:16px; background:var(--green); color:white;
+            border:none; border-radius:12px; font-size:16px; font-weight:700;
+            font-family:'Poppins',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:4px;
+        }
+        .pay-btn:hover { background:#086318; }
+        .pay-btn:disabled { background:#ccc; cursor:not-allowed; }
+
+        #pay-status { text-align:center; margin-top:14px; font-size:14px; font-weight:600; min-height:20px; }
+
+        /* Success screen */
+        .success-screen { display:none; text-align:center; }
+        .success-screen .tick { font-size:72px; display:block; margin-bottom:16px; }
+        .success-screen h2 { font-family:'Poppins',sans-serif; font-size:22px; margin-bottom:8px; }
+        .success-screen p { color:var(--gray); font-size:14px; margin-bottom:20px; line-height:1.7; }
+        .success-screen a {
+            display:inline-block; padding:12px 28px; background:var(--green);
+            color:white; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px;
+        }
+
+        /* Security badge */
+        .secure-note {
+            text-align:center; margin-top:20px; font-size:12px; color:var(--gray);
+            display:flex; align-items:center; justify-content:center; gap:6px;
+        }

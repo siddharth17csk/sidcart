@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SidCart - Shop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="css/shop.css">
+</head>
+<body>
+
+<header class="navbar">
+    <div class="logo">Sid<span>Cart</span></div>
+    <div class="search-wrap">
+        <input type="text" id="search-input" placeholder="Search products, brands...">
+        <button>🔍</button>
+    </div>
+    <div class="nav-right">
+        <span class="user-greeting" id="user-greeting"></span>
+        <button class="nav-btn" id="login-btn" style="display:none;">Login</button>
+        <button class="nav-btn" id="signup-btn" style="display:none;">Sign Up</button>
+        <button class="nav-btn" id="orders-btn" style="display:none;">📋 Orders</button>
+        <button class="nav-btn" id="logout-btn" style="display:none;">Logout</button>
+        <button class="nav-btn cart-btn" id="cart-btn">🛒 Cart <span class="cart-count" id="cart-count">0</span></button>
+    </div>
+</header>
+
+<div class="categories-bar" id="categories-bar">
+    <button class="cat-chip active" data-cat="All">All</button>
+</div>
+
+<section class="hero">
+    <h1>Shop Smart, Live Better ⚡</h1>
+    <p>Best deals on electronics, fashion, groceries & more</p>
+</section>
+
+<div class="shop-layout">
+    <aside class="filters-sidebar">
+
+        <!-- SORT BY -->
+        <div class="filter-section">
+            <h3>Sort By</h3>
+            <select class="sort-select-sidebar" id="sort-select">
+                <option value="">Default</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="qty-desc">Most Stock</option>
+            </select>
+        </div>
+
+        <!-- GENDER -->
+        <div class="filter-section">
+            <h3>Gender</h3>
+            <div class="gender-pills">
+                <button class="gender-pill active" data-gender="All">All</button>
+                <button class="gender-pill" data-gender="Men">Men</button>
+                <button class="gender-pill" data-gender="Women">Women</button>
+                <button class="gender-pill" data-gender="Kids">Kids</button>
+                <button class="gender-pill" data-gender="Unisex">Unisex</button>
+            </div>
+        </div>
+
+        <!-- PRICE -->
+        <div class="filter-section">
+            <h3>Price Range</h3>
+            <div class="price-range">
+                <input type="number" id="price-min" placeholder="Min ₹">
+                <input type="number" id="price-max" placeholder="Max ₹">
+            </div>
+            <button class="apply-filter-btn" id="apply-price">Apply</button>
+        </div>
+
+        <!-- AVAILABILITY -->
+        <div class="filter-section">
+            <h3>Availability</h3>
+            <label class="filter-option">
+                <input type="checkbox" id="filter-instock">
+                <label for="filter-instock">In Stock only</label>
+            </label>
+        </div>
+
+        <!-- BRANDS -->
+        <div class="filter-section">
+            <h3>Brands</h3>
+            <div id="brand-list"></div>
+        </div>
+
+        <button class="clear-filters-btn" id="clear-filters">✕ Clear All Filters</button>
+    </aside>
+
+    <section class="products-main">
+        <div class="products-toolbar">
+            <span id="product-count">Loading...</span>
+        </div>
+        <div class="active-filters" id="active-filters"></div>
+        <div id="product-grid"><div class="loading">Loading products...</div></div>
+    </section>
+</div>
+
+<div class="toast" id="toast"></div>
+<script type="module" src="js/shop.js"></script>
+</body>
+</html>

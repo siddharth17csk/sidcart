@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Payment - SidCart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/payment.css">
+</head>
+<body>
+
+<div class="payment-card">
+
+    <!-- PAYMENT FORM (shown by default) -->
+    <div id="payment-form-section">
+        <div class="pay-header">
+            <div class="pay-logo">Sid<span>Cart</span></div>
+            <div class="upi-badge">📱 UPI Payment Gateway</div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-box">
+            <h3>Order Summary</h3>
+            <div id="order-items-list"></div>
+            <hr class="order-divider">
+            <div class="order-total-row">
+                <span>Total Payable</span>
+                <span id="order-total-display">₹0</span>
+            </div>
+        </div>
+
+        <!-- UPI Form -->
+        <div class="form-section">
+            <h2>Enter UPI Details 📱</h2>
+            <p>Complete your payment securely using UPI</p>
+
+            <label>UPI ID</label>
+            <input type="text" id="upi-id" placeholder="yourname@upi or phone@paytm">
+            <p class="hint">Example: 9876543210@paytm · name@gpay · id@upi</p>
+
+            <label>UPI PIN</label>
+            <input type="password" id="upi-pin" placeholder="Enter 4 or 6 digit PIN" maxlength="6">
+            <p class="hint">Your secret PIN will not be stored anywhere</p>
+
+            <button class="pay-btn" id="pay-btn">Pay Now 🔒</button>
+            <div id="pay-status"></div>
+        </div>
+
+        <div class="secure-note">🔒 256-bit SSL Secured · Dummy Payment (Demo Only)</div>
+    </div>
+
+    <!-- SUCCESS SCREEN (shown after payment) -->
+    <div class="success-screen" id="success-screen">
+        <span class="tick">🎉</span>
+        <h2>Payment Successful!</h2>
+        <p>Your order has been confirmed.<br>A confirmation email has been sent to your registered email address.</p>
+        <a href="orders.html">View My Orders</a>
+    </div>
+
+</div>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="module" src="js/payment.js"></script>
+</body>
+</html>

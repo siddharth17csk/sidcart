@@ -1,0 +1,42 @@
+        :root { --green: #0c831f; --text: #1a1a2e; --gray: #666; --red: #e53935; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 50px 44px;
+            width: 420px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--gray); font-size: 14px; text-decoration: none;
+            margin-bottom: 30px; transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--text); }
+        .logo { font-family:'Poppins',sans-serif; font-size:32px; font-weight:900; color:#1a1a2e; }
+        .logo span { color: var(--green); }
+        .subtitle { color: var(--gray); font-size:14px; margin-top:6px; margin-bottom:36px; }
+        label { display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px; }
+        input {
+            width:100%; padding:14px 16px;
+            border:2px solid #e8e8e8; border-radius:12px;
+            font-size:15px; font-family:'DM Sans',sans-serif;
+            margin-bottom:20px; transition:border 0.2s; outline:none;
+        }
+        input:focus { border-color: #1a1a2e; }
+        button {
+            width:100%; padding:16px;
+            background:#1a1a2e; color:white;
+            border:none; border-radius:12px;
+            font-size:16px; font-weight:600; font-family:'Poppins',sans-serif;
+            cursor:pointer; transition:all 0.2s; margin-top:6px;
+        }
+        button:hover { background:#0f3460; transform:translateY(-1px); }
+        #status { text-align:center; margin-top:16px; font-size:14px; font-weight:600; min-height:20px; }
+        .shield { font-size:48px; margin-bottom:20px; display:block; }

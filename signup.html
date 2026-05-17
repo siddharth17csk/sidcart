@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SidCart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/signup.css">
+</head>
+<body>
+    <div class="card">
+        <a class="back-link" href="index.html">← Back</a>
+        <div class="logo">Sid<span>Cart</span></div>
+        <h2>Create an account 🛍️</h2>
+        <p class="sub">Join thousands of happy shoppers</p>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="name" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label>Mobile Number *</label>
+                <input type="tel" id="mobile" placeholder="10 digit number">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+            <label>Password *</label>
+            <input type="password" id="password" placeholder="Min 6 characters">
+        </div>
+        <p class="pw-rules">Must be at least 6 characters</p>
+        <div class="form-group">
+            <label>Confirm Password *</label>
+            <input type="password" id="confirm-password" placeholder="Repeat password">
+        </div>
+
+        <button id="signup-btn">Create Account</button>
+        <div id="status"></div>
+
+        <div class="footer-text" style="margin-top:20px;">
+            Already have an account? <a href="login.html">Sign In</a>
+        </div>
+    </div>
+
+   <script type="module" src="js/signup.js"></script>
+</body>
+</html>
