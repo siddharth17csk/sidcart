@@ -1,42 +1,45 @@
-        :root { --green: #0c831f; --text: #1a1a2e; --gray: #666; --red: #e53935; }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@400;600;700&display=swap');
+        :root { --ocean: #1a7fa8; --driftwood: #6b5740; --driftwood-dark: #4e3d2b; --text: #2c1f0e; --gray: #8a7560; --red: #c94d35; }
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Nunito', sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: linear-gradient(150deg, #2c1f0e 0%, #4e3d2b 45%, #1a7fa8 100%);
             display: flex; align-items: center; justify-content: center;
         }
         .card {
-            background: white;
-            border-radius: 24px;
+            background: #fdf6e3;
+            border-radius: 28px;
             padding: 50px 44px;
             width: 420px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+            border-top: 4px solid var(--driftwood);
         }
         .back-link {
             display: inline-flex; align-items: center; gap: 6px;
             color: var(--gray); font-size: 14px; text-decoration: none;
-            margin-bottom: 30px; transition: color 0.2s;
+            margin-bottom: 30px; transition: color 0.2s; font-weight: 600;
         }
         .back-link:hover { color: var(--text); }
-        .logo { font-family:'Poppins',sans-serif; font-size:32px; font-weight:900; color:#1a1a2e; }
-        .logo span { color: var(--green); }
-        .subtitle { color: var(--gray); font-size:14px; margin-top:6px; margin-bottom:36px; }
-        label { display:block; font-size:13px; font-weight:600; color:var(--text); margin-bottom:6px; }
+        .logo { font-family:'Playfair Display',serif; font-size:32px; font-weight:900; color:var(--driftwood); }
+        .logo span { color: var(--ocean); }
+        .subtitle { color: var(--gray); font-size:14px; margin-top:6px; margin-bottom:36px; letter-spacing:0.2px; }
+        label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; letter-spacing:0.3px; }
         input {
             width:100%; padding:14px 16px;
-            border:2px solid #e8e8e8; border-radius:12px;
-            font-size:15px; font-family:'DM Sans',sans-serif;
-            margin-bottom:20px; transition:border 0.2s; outline:none;
+            border:2px solid #e0d5c5; border-radius:12px;
+            font-size:15px; font-family:'Nunito',sans-serif;
+            margin-bottom:20px; transition:border 0.2s; outline:none; background:white;
         }
-        input:focus { border-color: #1a1a2e; }
+        input:focus { border-color: var(--driftwood); }
         button {
             width:100%; padding:16px;
-            background:#1a1a2e; color:white;
+            background:var(--driftwood); color:#fdf6e3;
             border:none; border-radius:12px;
-            font-size:16px; font-weight:600; font-family:'Poppins',sans-serif;
+            font-size:15px; font-weight:700; font-family:'Nunito',sans-serif;
             cursor:pointer; transition:all 0.2s; margin-top:6px;
+            letter-spacing:0.5px;
         }
-        button:hover { background:#0f3460; transform:translateY(-1px); }
-        #status { text-align:center; margin-top:16px; font-size:14px; font-weight:600; min-height:20px; }
+        button:hover { background:var(--driftwood-dark); transform:translateY(-1px); box-shadow:0 8px 24px rgba(78,61,43,0.35); }
+        #status { text-align:center; margin-top:16px; font-size:14px; font-weight:700; min-height:20px; }
         .shield { font-size:48px; margin-bottom:20px; display:block; }

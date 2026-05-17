@@ -1,69 +1,66 @@
-        :root { --green:#0c831f; --green-light:#e8f5e9; --text:#1a1a2e; --gray:#666; --border:#e8e8e8; --bg:#f5f7fa; }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Nunito:wght@400;600;700&display=swap');
+        :root { --ocean:#1a7fa8; --ocean-dark:#145f80; --ocean-light:#e0f4fb; --text:#2c1f0e; --gray:#8a7560; --border:#e0d5c5; --bg:#f5efe0; }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'DM Sans',sans-serif; background:var(--bg); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+        body { font-family:'Nunito',sans-serif; background:linear-gradient(160deg,#b8dff0 0%,#dff2f9 40%,#fdf6e3 100%); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
 
         .payment-card {
-            background:white; border-radius:24px; padding:36px 32px;
+            background:white; border-radius:28px; padding:36px 32px;
             width:100%; max-width:460px;
-            box-shadow:0 20px 60px rgba(0,0,0,0.1);
+            box-shadow:0 24px 72px rgba(26,127,168,0.16), 0 4px 16px rgba(0,0,0,0.06);
+            border-top:4px solid var(--ocean);
         }
 
-        /* Header */
         .pay-header { text-align:center; margin-bottom:28px; }
-        .pay-logo { font-family:'Poppins',sans-serif; font-size:26px; font-weight:900; color:var(--green); }
-        .pay-logo span { color:var(--text); }
+        .pay-logo { font-family:'Playfair Display',serif; font-size:26px; font-weight:900; color:var(--ocean); }
+        .pay-logo span { color:#e8634a; }
         .upi-badge {
             display:inline-flex; align-items:center; gap:6px;
-            background:#f0f0fa; border-radius:20px; padding:6px 14px;
-            font-size:13px; font-weight:700; color:#3b3b9e; margin-top:10px;
+            background:#f0ece6; border-radius:20px; padding:6px 14px;
+            font-size:13px; font-weight:700; color:var(--driftwood,#6b5740); margin-top:10px;
         }
 
-        /* Order summary box */
         .order-box {
             background:var(--bg); border-radius:14px; padding:16px 18px;
             margin-bottom:24px; border:1px solid var(--border);
         }
-        .order-box h3 { font-family:'Poppins',sans-serif; font-size:14px; font-weight:700; margin-bottom:12px; color:var(--gray); text-transform:uppercase; letter-spacing:0.5px; }
+        .order-box h3 { font-family:'Nunito',sans-serif; font-size:12px; font-weight:700; margin-bottom:12px; color:var(--gray); text-transform:uppercase; letter-spacing:1px; }
         .order-item-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px; }
         .order-item-row .name { color:var(--text); font-weight:600; }
-        .order-item-row .amount { color:var(--text); }
+        .order-item-row .amount { color:var(--text); font-weight:600; }
         .order-divider { border:none; border-top:1px solid var(--border); margin:10px 0; }
-        .order-total-row { display:flex; justify-content:space-between; font-size:16px; font-weight:700; font-family:'Poppins',sans-serif; }
+        .order-total-row { display:flex; justify-content:space-between; font-size:16px; font-weight:700; font-family:'Playfair Display',serif; color:var(--text); }
 
-        /* Form */
-        .form-section h2 { font-family:'Poppins',sans-serif; font-size:18px; margin-bottom:6px; }
-        .form-section p { font-size:13px; color:var(--gray); margin-bottom:20px; }
-        label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; }
+        .form-section h2 { font-family:'Playfair Display',serif; font-size:18px; margin-bottom:6px; color:var(--text); }
+        .form-section p { font-size:13px; color:var(--gray); margin-bottom:20px; font-weight:600; }
+        label { display:block; font-size:13px; font-weight:700; color:var(--text); margin-bottom:6px; letter-spacing:0.3px; }
         input {
             width:100%; padding:14px 16px; border:2px solid var(--border);
-            border-radius:12px; font-size:15px; font-family:'DM Sans',sans-serif;
-            outline:none; transition:border 0.2s; margin-bottom:16px;
+            border-radius:12px; font-size:15px; font-family:'Nunito',sans-serif;
+            outline:none; transition:border 0.2s; margin-bottom:16px; background:#fdfaf6;
         }
-        input:focus { border-color:var(--green); }
-        .hint { font-size:12px; color:var(--gray); margin-top:-12px; margin-bottom:16px; }
+        input:focus { border-color:var(--ocean); background:white; }
+        .hint { font-size:12px; color:var(--gray); margin-top:-12px; margin-bottom:16px; font-weight:600; }
 
         .pay-btn {
-            width:100%; padding:16px; background:var(--green); color:white;
-            border:none; border-radius:12px; font-size:16px; font-weight:700;
-            font-family:'Poppins',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:4px;
+            width:100%; padding:16px; background:var(--ocean); color:white;
+            border:none; border-radius:12px; font-size:15px; font-weight:700;
+            font-family:'Nunito',sans-serif; cursor:pointer; transition:all 0.2s; margin-top:4px;
         }
-        .pay-btn:hover { background:#086318; }
-        .pay-btn:disabled { background:#ccc; cursor:not-allowed; }
+        .pay-btn:hover { background:var(--ocean-dark); transform:translateY(-1px); box-shadow:0 6px 20px rgba(26,127,168,0.3); }
+        .pay-btn:disabled { background:#ccc; cursor:not-allowed; transform:none; }
 
-        #pay-status { text-align:center; margin-top:14px; font-size:14px; font-weight:600; min-height:20px; }
+        #pay-status { text-align:center; margin-top:14px; font-size:14px; font-weight:700; min-height:20px; }
 
-        /* Success screen */
         .success-screen { display:none; text-align:center; }
         .success-screen .tick { font-size:72px; display:block; margin-bottom:16px; }
-        .success-screen h2 { font-family:'Poppins',sans-serif; font-size:22px; margin-bottom:8px; }
-        .success-screen p { color:var(--gray); font-size:14px; margin-bottom:20px; line-height:1.7; }
+        .success-screen h2 { font-family:'Playfair Display',serif; font-size:22px; margin-bottom:8px; color:var(--text); }
+        .success-screen p { color:var(--gray); font-size:14px; margin-bottom:20px; line-height:1.7; font-weight:600; }
         .success-screen a {
-            display:inline-block; padding:12px 28px; background:var(--green);
+            display:inline-block; padding:12px 28px; background:var(--ocean);
             color:white; border-radius:10px; text-decoration:none; font-weight:700; font-size:14px;
         }
 
-        /* Security badge */
         .secure-note {
             text-align:center; margin-top:20px; font-size:12px; color:var(--gray);
-            display:flex; align-items:center; justify-content:center; gap:6px;
+            display:flex; align-items:center; justify-content:center; gap:6px; font-weight:600;
         }

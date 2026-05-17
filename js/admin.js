@@ -22,9 +22,7 @@ if (!sessionStorage.getItem("adminUID")) {
     window.location.href = "admin-login.html";
 }
 
-// ─── CACHE ────────────────────────────────────
-// FIX: Added cache object so Firestore is only read ONCE per session.
-// Cache is cleared (set to null) only after a write, so data stays fresh.
+
 const cache = {
     products: null,
     categories: null,
