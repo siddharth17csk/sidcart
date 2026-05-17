@@ -1,4 +1,3 @@
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 import {
@@ -22,6 +21,15 @@ const db = getFirestore(app);
 if (!sessionStorage.getItem("adminUID")) {
     window.location.href = "admin-login.html";
 }
+
+// ─── CACHE ────────────────────────────────────
+// FIX: Added cache object so Firestore is only read ONCE per session.
+// Cache is cleared (set to null) only after a write, so data stays fresh.
+const cache = {
+    products: null,
+    categories: null,
+    customers: null,
+};
 
 // ─── NAVIGATION ───────────────────────────────
 document.querySelectorAll(".nav-item").forEach(item => {
@@ -47,20 +55,43 @@ document.getElementById("logout-btn").addEventListener("click", async () => {
 
 // ─── DASHBOARD ────────────────────────────────
 async function loadDashboard() {
-    const [prods, cats, custs, orders, sales] = await Promise.all([
-        getDocs(collection(db, "products")),
-        getDocs(collection(db, "Categories")),
-        getDocs(query(collection(db, "users"), where("role", "==", "customer"))),
+    // FIX: Use cached data where available to avoid re-reading Firestore.
+    // Only collections without a cache (orders, sales) are freshly fetched here.
+    const [orders, sales] = await Promise.all([
         getDocs(collection(db, "orders")),
         getDocs(collection(db, "sales"))
     ]);
-    document.getElementById("stat-products").textContent = prods.size;
-    document.getElementById("stat-categories").textContent = cats.size;
-    document.getElementById("stat-customers").textContent = custs.size;
+
+    // Use cached products/categories/customers if already loaded
+    if (!cache.products) {
+        const snap = await getDocs(collection(db, "products"));
+        cache.products = [];
+        snap.forEach(d => cache.products.push({ id: d.id, ...d.data() }));
+    }
+    if (!cache.categories) {
+        const snap = await getDocs(collection(db, "Categories"));
+        cache.categories = [];
+        snap.forEach(d => cache.categories.push({ id: d.id, ...d.data() }));
+    }
+    if (!cache.customers) {
+        // FIX: Removed role=="customer" filter — fetches all non-admin users
+        // so customers who bought things but have no/different role field still appear.
+        const snap = await getDocs(collection(db, "users"));
+        cache.customers = [];
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.role !== "admin") cache.customers.push({ id: d.id, ...data });
+        });
+    }
+
+    document.getElementById("stat-products").textContent = cache.products.length;
+    document.getElementById("stat-categories").textContent = cache.categories.length;
+    document.getElementById("stat-customers").textContent = cache.customers.length;
     document.getElementById("stat-orders").textContent = orders.size;
-    let lowStock = 0;
-    prods.forEach(d => { if (d.data().qty < 15) lowStock++; });
+
+    const lowStock = cache.products.filter(p => p.qty < 15).length;
     document.getElementById("stat-lowstock").textContent = lowStock;
+
     let revenue = 0;
     sales.forEach(d => { revenue += d.data().totalAmount || 0; });
     document.getElementById("stat-revenue").textContent = "₹" + revenue.toLocaleString("en-IN");
@@ -70,9 +101,13 @@ async function loadDashboard() {
 let allCategories = [];
 
 async function loadCategories() {
-    const snap = await getDocs(collection(db, "Categories"));
-    allCategories = [];
-    snap.forEach(d => allCategories.push({ id: d.id, ...d.data() }));
+    // FIX: Only fetch from Firestore if cache is empty
+    if (!cache.categories) {
+        const snap = await getDocs(collection(db, "Categories"));
+        cache.categories = [];
+        snap.forEach(d => cache.categories.push({ id: d.id, ...d.data() }));
+    }
+    allCategories = cache.categories;
     renderCategories();
     populateCategoryDropdowns();
 }
@@ -115,6 +150,8 @@ document.getElementById("add-cat-btn").addEventListener("click", async () => {
         await addDoc(collection(db, "Categories"), { Category: name });
         status.textContent = "Category added!"; status.style.color = "green";
         document.getElementById("cat-name").value = "";
+        // FIX: Invalidate cache after write so next load fetches fresh data
+        cache.categories = null;
         loadCategories();
     } catch (e) { status.textContent = e.message; status.style.color = "red"; }
 });
@@ -122,6 +159,8 @@ document.getElementById("add-cat-btn").addEventListener("click", async () => {
 window.deleteCat = async function(id) {
     if (!confirm("Delete this category?")) return;
     await deleteDoc(doc(db, "Categories", id));
+    // FIX: Invalidate cache after delete
+    cache.categories = null;
     loadCategories();
 };
 
@@ -132,9 +171,13 @@ let currentPage = 1;
 
 async function loadInventory() {
     if (allCategories.length === 0) await loadCategories();
-    const snap = await getDocs(collection(db, "products"));
-    allProducts = [];
-    snap.forEach(d => allProducts.push({ id: d.id, ...d.data() }));
+    // FIX: Only fetch from Firestore if cache is empty
+    if (!cache.products) {
+        const snap = await getDocs(collection(db, "products"));
+        cache.products = [];
+        snap.forEach(d => cache.products.push({ id: d.id, ...d.data() }));
+    }
+    allProducts = cache.products;
     applyFilters();
 }
 
@@ -198,17 +241,41 @@ function renderInventory(products) {
     renderPagination(total, products);
 }
 
+// FIX: Replaced full page list with windowed pagination.
+// Now renders at most 7 buttons: [1] … [4][5][6] … [70]
+// instead of all 70 at once, which caused the overflow.
 function renderPagination(total, products) {
     const pages = Math.ceil(total / PAGE_SIZE);
     const container = document.getElementById("inv-pagination");
     container.innerHTML = "";
-    for (let i = 1; i <= pages; i++) {
+    if (pages <= 1) return;
+
+    const addBtn = (label, page) => {
         const btn = document.createElement("button");
-        btn.className = "page-btn" + (i === currentPage ? " active" : "");
-        btn.textContent = i;
-        btn.onclick = () => { currentPage = i; renderInventory(products); };
+        btn.className = "page-btn" + (page === currentPage ? " active" : "");
+        btn.textContent = label;
+        btn.onclick = () => { currentPage = page; renderInventory(products); };
         container.appendChild(btn);
+    };
+
+    const addEllipsis = () => {
+        const span = document.createElement("span");
+        span.textContent = "…";
+        span.style.cssText = "padding:0 6px;line-height:36px;color:#666;font-size:16px;";
+        container.appendChild(span);
+    };
+
+    // Build set of page numbers to show: first, last, and window around current
+    const range = new Set([1, pages]);
+    for (let i = Math.max(2, currentPage - 2); i <= Math.min(pages - 1, currentPage + 2); i++) {
+        range.add(i);
     }
+    const sorted = [...range].sort((a, b) => a - b);
+
+    sorted.forEach((page, idx) => {
+        if (idx > 0 && page - sorted[idx - 1] > 1) addEllipsis();
+        addBtn(page, page);
+    });
 }
 
 // ADD PRODUCT
@@ -234,6 +301,8 @@ document.getElementById("add-product-btn").addEventListener("click", async () =>
         status.textContent = "✅ Product added!"; status.style.color = "green";
         ["p-title","p-brand","p-subcategory","p-price","p-qty","p-image","p-description"].forEach(id => document.getElementById(id).value = "");
         document.getElementById("p-category").value = "";
+        // FIX: Invalidate cache after adding a product
+        cache.products = null;
         loadInventory();
     } catch (e) { status.textContent = e.message; status.style.color = "red"; }
 });
@@ -241,6 +310,8 @@ document.getElementById("add-product-btn").addEventListener("click", async () =>
 // TOGGLE ACTIVE
 window.toggleActive = async function(id, isActive) {
     await updateDoc(doc(db, "products", id), { active: !isActive });
+    // FIX: Invalidate cache after update
+    cache.products = null;
     loadInventory();
 };
 
@@ -259,6 +330,8 @@ document.getElementById("confirm-yes").onclick = async () => {
         await deleteDoc(doc(db, "products", pendingDeleteId));
         document.getElementById("confirm-dialog").classList.remove("open");
         pendingDeleteId = null;
+        // FIX: Invalidate cache after delete
+        cache.products = null;
         loadInventory();
     }
 };
@@ -275,7 +348,6 @@ window.openEditModal = function(id) {
     document.getElementById("edit-qty").value = p.qty || "";
     document.getElementById("edit-image").value = p.image || "";
     document.getElementById("edit-description").value = p.description || "";
-    // populate edit category
     const sel = document.getElementById("edit-category");
     sel.innerHTML = "";
     allCategories.forEach(cat => {
@@ -303,15 +375,26 @@ document.getElementById("save-edit-btn").addEventListener("click", async () => {
             description: document.getElementById("edit-description").value.trim()
         });
         status.textContent = "✅ Updated!"; status.style.color = "green";
+        // FIX: Invalidate cache after edit
+        cache.products = null;
         setTimeout(() => { document.getElementById("edit-modal").classList.remove("open"); loadInventory(); }, 1000);
     } catch (e) { status.textContent = e.message; status.style.color = "red"; }
 });
 
 // ─── CUSTOMERS ────────────────────────────────
 async function loadCustomers() {
-    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "Customer")));
-    const customers = [];
-    snap.forEach(d => customers.push({ id: d.id, ...d.data() }));
+    // FIX: Removed where("role","==","customer") filter — this was the reason
+    // the customers table was empty. Now fetches all users and excludes only admins,
+    // so anyone who bought something shows up regardless of their role field value.
+    if (!cache.customers) {
+        const snap = await getDocs(collection(db, "users"));
+        cache.customers = [];
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.role !== "admin") cache.customers.push({ id: d.id, ...data });
+        });
+    }
+    const customers = cache.customers;
     renderCustomers(customers);
 
     document.getElementById("cust-search").oninput = (e) => {
@@ -325,18 +408,35 @@ async function loadCustomers() {
 function renderCustomers(customers) {
     const tbody = document.getElementById("customers-tbody");
     tbody.innerHTML = "";
+    if (customers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#666;padding:40px;">No customers found.</td></tr>`;
+        return;
+    }
     customers.forEach(c => {
-        tbody.innerHTML += `<tr>
-            <td>${c.name}</td>
-            <td>${c.email}</td>
-            <td>${c.mobile}</td>
+        // FIX: Store data in data-* attributes instead of inline onclick strings
+        // to avoid XSS and breakage when names contain quotes (e.g. O'Brien)
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${c.name || "—"}</td>
+            <td>${c.email || "—"}</td>
+            <td>${c.mobile || "—"}</td>
             <td>₹${c.creditLimit ?? 1000}</td>
             <td>
-                <button class="btn btn-blue" onclick="openCreditModal('${c.id}','${c.name}',${c.creditLimit ?? 1000})">
+                <button class="btn btn-blue credit-btn"
+                    data-uid="${c.id}"
+                    data-name="${(c.name || "").replace(/"/g, "&quot;")}"
+                    data-limit="${c.creditLimit ?? 1000}">
                     💳 Edit Credit
                 </button>
-            </td>
-        </tr>`;
+            </td>`;
+        tbody.appendChild(row);
+    });
+
+    // Attach click listeners after rendering (safe, no inline JS)
+    tbody.querySelectorAll(".credit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            openCreditModal(btn.dataset.uid, btn.dataset.name, Number(btn.dataset.limit));
+        });
     });
 }
 
@@ -354,6 +454,8 @@ document.getElementById("save-credit-btn").addEventListener("click", async () =>
     try {
         await updateDoc(doc(db, "users", uid), { creditLimit: limit });
         status.textContent = "✅ Updated!"; status.style.color = "green";
+        // FIX: Invalidate customers cache after credit limit update
+        cache.customers = null;
         setTimeout(() => { document.getElementById("credit-modal").classList.remove("open"); loadCustomers(); }, 800);
     } catch (e) { status.textContent = e.message; status.style.color = "red"; }
 });
@@ -397,7 +499,6 @@ async function loadSalesReport() {
     document.getElementById("r-cash").textContent = cash;
     document.getElementById("r-credit").textContent = credit;
 
-    // Item aggregation
     const itemMap = {};
     salesData.forEach(sale => {
         (sale.items || []).forEach(item => {
@@ -423,7 +524,7 @@ async function loadSalesReport() {
 // Inventory Report
 document.getElementById("r-inv-cat-filter").addEventListener("change", () => loadInventoryReport());
 async function loadInventoryReport() {
-    if (allProducts.length === 0) await loadInventory();
+    if (!cache.products) await loadInventory();
     const catFilter = document.getElementById("r-inv-cat-filter").value;
     let prods = allProducts;
     if (catFilter) prods = prods.filter(p => p.category === catFilter);
@@ -445,12 +546,21 @@ async function loadInventoryReport() {
 document.getElementById("load-cust-report-btn").addEventListener("click", async () => {
     const from = document.getElementById("cust-report-from").value;
     const to = document.getElementById("cust-report-to").value;
-    const [ordersSnap, usersSnap] = await Promise.all([
-        getDocs(collection(db, "orders")),
-        getDocs(query(collection(db, "users"), where("role", "==", "customer")))
-    ]);
+
+    // FIX: Reuse cached customers instead of re-fetching
+    if (!cache.customers) {
+        const snap = await getDocs(collection(db, "users"));
+        cache.customers = [];
+        snap.forEach(d => {
+            const data = d.data();
+            if (data.role !== "admin") cache.customers.push({ id: d.id, ...data });
+        });
+    }
+    const ordersSnap = await getDocs(collection(db, "orders"));
+
     const users = {};
-    usersSnap.forEach(d => users[d.id] = d.data());
+    cache.customers.forEach(c => users[c.id] = c);
+
     const custMap = {};
     ordersSnap.forEach(d => {
         const order = d.data();
@@ -458,20 +568,26 @@ document.getElementById("load-cust-report-btn").addEventListener("click", async 
         if (from && orderDate < new Date(from)) return;
         if (to && orderDate > new Date(to + "T23:59:59")) return;
         const uid = order.userId || "unknown";
-        if (!custMap[uid]) custMap[uid] = { orders: 0, total: 0, payment: order.paymentMethod };
+        if (!custMap[uid]) custMap[uid] = { orders: 0, total: 0, payments: {} };
         custMap[uid].orders++;
         custMap[uid].total += order.totalAmount || 0;
+        // FIX: Track all payment methods used, not just the first one
+        const pm = order.paymentMethod || "unknown";
+        custMap[uid].payments[pm] = (custMap[uid].payments[pm] || 0) + 1;
     });
+
     const sorted = Object.entries(custMap).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
     const tbody = document.getElementById("top-customers-tbody");
     tbody.innerHTML = sorted.map(([uid, data], i) => {
         const u = users[uid];
+        // Show most-used payment method
+        const topPayment = Object.entries(data.payments).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
         return `<tr>
             <td>${i+1}</td>
             <td>${u ? u.name : uid}</td>
             <td>${data.orders}</td>
             <td>₹${data.total.toLocaleString("en-IN")}</td>
-            <td>${data.payment}</td>
+            <td>${topPayment}</td>
         </tr>`;
     }).join("") || `<tr><td colspan="5" style="text-align:center;color:#666;padding:30px;">No data</td></tr>`;
 });
