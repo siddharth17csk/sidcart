@@ -1,4 +1,4 @@
-        :root {
+:root {
             --green: #0c831f; --green-dark: #086318; --green-light: #e8f5e9;
             --accent: #ff6b35; --text: #1a1a2e; --gray: #666;
             --border: #e8e8e8; --bg: #f5f7fa; --white: #fff;
@@ -148,10 +148,22 @@
         .confirm-box-btns { display:flex; gap:12px; justify-content:center; }
         .empty-state { text-align:center; padding:60px 20px; color:var(--gray); }
         .empty-state .icon { font-size:48px; margin-bottom:12px; }
-        .pagination { display:flex; justify-content:center; gap:8px; padding:20px; }
+
+        /* FIX: Pagination — scrollable horizontally on overflow, wraps on wider screens */
+        .pagination {
+            display:flex;
+            flex-wrap:wrap;           /* buttons wrap to next line instead of overflowing */
+            justify-content:center;
+            align-items:center;
+            gap:6px;
+            padding:16px 20px;
+            overflow-x:auto;          /* fallback scroll if somehow still overflows */
+            -webkit-overflow-scrolling:touch; /* smooth scroll on iOS */
+        }
         .page-btn {
             width:36px; height:36px; border:2px solid var(--border); background:white;
             border-radius:8px; cursor:pointer; font-weight:600; font-size:14px; transition:all 0.2s;
+            flex-shrink:0;            /* prevent buttons from squishing */
         }
         .page-btn.active { background:var(--green); color:white; border-color:var(--green); }
         .page-btn:hover:not(.active) { border-color:var(--green); }

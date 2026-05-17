@@ -391,8 +391,12 @@ async function loadCustomers() {
         cache.customers = [];
         snap.forEach(d => {
             const data = d.data();
+            // DEBUG: Log every user doc so you can see what fields exist in Firebase
+            console.log("USER DOC →", d.id, JSON.stringify(data));
             if (data.role !== "admin") cache.customers.push({ id: d.id, ...data });
         });
+        // DEBUG: Log final customer count after filtering
+        console.log("Total users fetched:", snap.size, "| After excluding admins:", cache.customers.length);
     }
     const customers = cache.customers;
     renderCustomers(customers);
