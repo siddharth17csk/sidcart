@@ -309,7 +309,7 @@ document.getElementById("save-edit-btn").addEventListener("click", async () => {
 
 // ─── CUSTOMERS ────────────────────────────────
 async function loadCustomers() {
-    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "customer")));
+    const snap = await getDocs(query(collection(db, "users"), where("role", "==", "Customer")));
     const customers = [];
     snap.forEach(d => customers.push({ id: d.id, ...d.data() }));
     renderCustomers(customers);
